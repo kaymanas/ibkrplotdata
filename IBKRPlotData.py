@@ -29,9 +29,6 @@ register_matplotlib_converters()
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-#import from coinbase
-#from bs4 import BeautifulSoup
-#import json
 import dateutil.parser as dt
 
 
@@ -127,8 +124,6 @@ for currency in all_stocks:
 	stocks_np = data_single[['Symbol']].to_numpy() 
 	stocks[currency] = stocks_np.tolist()
 
-#print(stocks)
-
 # make separate dataframes for each stock
 stocks_by_currency = {}
 stock_sheets = {}
@@ -141,7 +136,6 @@ for currency in stocks:
 		
 		this_stock = stock[0]
 		this_stock_currency = this_stock + ' - {}'.format(currency)
-		#stock_sheets[this_stock] = all_data[all_data['Symbol'] == this_stock]
 		stock_sheets[this_stock_currency] = all_stocks[currency][all_stocks[currency]['Symbol'] == this_stock]
 		
 		# merge same dates together
@@ -151,7 +145,6 @@ for currency in stocks:
 		aggregation_functions = {'Quantity': 'sum', 'T. Price': 'first', 'Realized P/L': 'sum', 'Basis': 'sum'}
 		temp_sheet = stock_sheets[this_stock_currency].groupby(stock_sheets[this_stock_currency]['Symbol']).aggregate(aggregation_functions)
 		realizedpl[this_stock_currency] = '${:.2f}'.format(temp_sheet['Realized P/L'].iloc[0])
-		#print('realized profit is {}'.format(realizedpl[this_stock]))
 		currentQuantity[this_stock_currency] = temp_sheet['Quantity'].iloc[0]
 		costBasis[this_stock_currency] = temp_sheet['Basis'].iloc[0]
 		
@@ -194,14 +187,11 @@ if fetch_yahoo_data:
 		
 			
 			headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
-			
-			#this_stock = 'FRO.TO'
+
 			
 			url_history = 'https://query1.finance.yahoo.com/v7/finance/download/{}?period1=570326400&period2={}&interval=1d&events=history'.format(this_stock,t1)
 			r_history = s.get(url_history,headers=headers)
 		
-			#print(r_history.text)
-			#break
 			error1 = '404 Not Found: No data found, symbol may be delisted'
 			error2 = '404 Not Found: Timestamp data missing.'
 			if r_history.text == error1 or r_history.text==error2:
@@ -225,10 +215,6 @@ if fetch_yahoo_data:
 			f.close()
 			print("-> {}".format(this_stock))
 			s.close()
-
-#print("printing stocks:")
-#for stock in stocklist:
-#	print(stock)
 		
 
 #################################################################################
@@ -247,8 +233,6 @@ low_column = 'Low'
 for stock in stocklist:
 
 	data_daily[stock] = pd.read_csv('ibkrdata/data_daily_{}.csv'.format(stock))
-	#print(stock)
-	#print(data_daily[stock])
 	data_daily[stock]['datetime'] = pd.to_datetime(data_daily[stock][date_column])
 	data_daily[stock] = data_daily[stock].set_index('datetime')
 	data_daily[stock].drop([date_column], axis=1, inplace=True)
@@ -314,10 +298,6 @@ for stock in stocklist:
 		for x, y, l in zip(xs, ys, stock_sheets[stock]['Quantity']):
 			texts.append(plt.text(x, y, l, size=10, style='oblique'))
 			
-		#adjust_text(texts, add_objects=bars, autoalign='xy', expand_objects=(0.1, 1),
-        #    only_move={'points':'', 'text':'y', 'objects':'y'}, force_text=0.75, force_objects=0.1,
-        #    arrowprops=dict(arrowstyle="simple, head_width=0.25, tail_width=0.05", color='r', lw=0.5, alpha=0.5))
-
 		adjust_text(texts, arrowprops=dict(arrowstyle='simple, head_width=0.25, tail_width=0.05', color='k', lw=0.5, alpha=.5), **kwargs, expand=[2.3,2.3])
 			
 		
@@ -330,9 +310,6 @@ for stock in stocklist:
 	fig.set_dpi(130)
 	fig.set_size_inches(18, 8)
 	
-	#ax.xaxis.set_major_locator(dates.DayLocator(interval=30))
-	#ax.xaxis.set_major_formatter(dates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
-	
 	locator = dates.AutoDateLocator(minticks=20, maxticks=40)
 	formatter = dates.ConciseDateFormatter(locator)
 	ax.xaxis.set_major_locator(locator)
@@ -340,13 +317,9 @@ for stock in stocklist:
 	
 	
 	ax.set_title("{}$".format(stock), fontsize=21)
-	#ax.set_xlabel(r'Date', fontsize=18)
 	ax.set_ylabel(r'Stock Price ($)', fontsize=18)
-	#ax.grid(False)
 	ax.grid(True,which='minor',linewidth=0.05)
-
 	ax.grid(True,which='major',linewidth=0.22)
-
 	ax.legend(loc='upper left')
 	
 	if plotCurrentPortfolioOnly:
@@ -358,15 +331,8 @@ for stock in stocklist:
 	
 	plt.close()
 		
-	#break
-
 
 pp.close()
 
 print('{} saved...'.format(pdffile))
 
-#if save_plot:
-#	plt.savefig('{}'.format(plot_name))
-#if show_plot:
-
-#plt.show()
